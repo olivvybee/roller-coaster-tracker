@@ -40,8 +40,15 @@ app.use(logger());
 app.get('/parks', async (ctx) => {
 	const db = getDB(ctx);
 
-	const parks = await db.park.findMany();
+	const parks = await db.park.findMany({ include: { coasters: true } });
 	return ctx.json(parks);
+});
+
+app.get('/coasters', async (ctx) => {
+	const db = getDB(ctx);
+
+	const coasters = await db.coaster.findMany();
+	return ctx.json(coasters);
 });
 
 export default app;

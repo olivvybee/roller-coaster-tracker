@@ -12,7 +12,23 @@ datasource db {
 }
 
 model Park {
-  id      String @id @unique
-  name    String
-  country String
+  id       String    @id @unique
+  name     String
+  country  String
+  coasters Coaster[]
+}
+
+model Coaster {
+  id        Int       @id @default(autoincrement())
+  name      String
+  ridden    Boolean
+  status    Int
+  opened    DateTime
+  closed    DateTime?
+  latitude  Float
+  longitude Float
+  rcdb      String
+
+  park   Park   @relation(fields: [parkId], references: [id])
+  parkId String
 }
