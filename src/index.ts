@@ -10,16 +10,38 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
+import { Context, Hono } from 'hono';
+import { bearerAuth } from 'hono/bearer-auth';
+import { logger } from 'hono/logger';
+import { prettyJSON } from 'hono/pretty-json';
 import { PrismaClient } from '@prisma/client';
 import { PrismaD1 } from '@prisma/adapter-d1';
 
-export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		const adapter = new PrismaD1(env.DB);
-		const prisma = new PrismaClient({ adapter });
+interface WorkerEnv extends Env {
+	API_KEY: string;
+}
 
-		const parks = await prisma.park.findMany();
-		const result = JSON.stringify(parks);
-		return new Response(result);
-	},
-} satisfies ExportedHandler<Env>;
+const getDB = (ctx: Context<{ Bindings: WorkerEnv }>) => {
+	const adapter = new PrismaD1(ctx.env.DB);
+	return new PrismaClient({ adapter });
+};
+
+const app = new Hono<{ Bindings: WorkerEnv }>();
+
+app.use(prettyJSON());
+app.use(logger());
+
+// TODO: Uncomment to enable auth
+// app.use(async (ctx, next) => {
+// 	const auth = bearerAuth({ token: ctx.env.API_KEY });
+// 	return auth(ctx, next);
+// });
+
+app.get('/parks', async (ctx) => {
+	const db = getDB(ctx);
+
+	const parks = await db.park.findMany();
+	return ctx.json(parks);
+});
+
+export default app;
