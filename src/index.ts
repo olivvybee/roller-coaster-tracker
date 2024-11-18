@@ -40,8 +40,23 @@ app.use(logger());
 app.get('/parks', async (ctx) => {
 	const db = getDB(ctx);
 
-	const parks = await db.park.findMany({ include: { coasters: true } });
+	const parks = await db.park.findMany({
+		include: { coasters: true },
+	});
+
 	return ctx.json(parks);
+});
+
+app.get('/parks/:id', async (ctx) => {
+	const db = getDB(ctx);
+
+	const id = ctx.req.param('id');
+	const park = await db.park.findUnique({
+		where: { id },
+		include: { coasters: true },
+	});
+
+	return ctx.json(park);
 });
 
 app.get('/coasters', async (ctx) => {
