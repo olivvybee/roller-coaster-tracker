@@ -16,6 +16,8 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { PrismaClient } from '@prisma/client';
 import { PrismaD1 } from '@prisma/adapter-d1';
+import { validator } from 'hono/validator';
+import { addPark, addParkSchema } from './addPark';
 
 interface WorkerEnv extends Env {
 	API_KEY: string;
@@ -58,6 +60,25 @@ app.get('/parks/:id', async (ctx) => {
 
 	return ctx.json(park);
 });
+
+app.post(
+	'/parks/add',
+	validator('json', (value, ctx) => {
+		const parsed = addParkSchema.safeParse(value);
+		if (!parsed.success) {
+			return ctx.json(parsed.error, 401);
+		}
+		return parsed.data;
+	}),
+	async (ctx) => {
+		const db = getDB(ctx);
+		const input = ctx.req.valid('json');
+
+		const result = await addPark(input, db);
+
+		return ctx.json(result);
+	}
+);
 
 app.get('/coasters', async (ctx) => {
 	const db = getDB(ctx);
