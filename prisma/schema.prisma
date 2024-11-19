@@ -19,11 +19,11 @@ model Park {
 }
 
 model Coaster {
-  id        Int       @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   name      String
   ridden    Boolean
-  opened    DateTime
-  closed    DateTime?
+  opened    String
+  closed    String?
   latitude  Float
   longitude Float
   rcdb      String

@@ -18,6 +18,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaD1 } from '@prisma/adapter-d1';
 import { validator } from 'hono/validator';
 import { addPark, addParkSchema } from './addPark';
+import { addCoaster, addCoasterSchema } from './addCoaster';
 
 interface WorkerEnv extends Env {
 	API_KEY: string;
@@ -75,7 +76,6 @@ app.post(
 		const input = ctx.req.valid('json');
 
 		const result = await addPark(input, db);
-
 		return ctx.json(result);
 	}
 );
@@ -86,5 +86,23 @@ app.get('/coasters', async (ctx) => {
 	const coasters = await db.coaster.findMany();
 	return ctx.json(coasters);
 });
+
+app.post(
+	'/coasters/add',
+	validator('json', (value, ctx) => {
+		const parsed = addCoasterSchema.safeParse(value);
+		if (!parsed.success) {
+			return ctx.json(parsed.error, 401);
+		}
+		return parsed.data;
+	}),
+	async (ctx) => {
+		const db = getDB(ctx);
+		const input = ctx.req.valid('json');
+
+		const result = await addCoaster(input, db);
+		return ctx.json(result);
+	}
+);
 
 export default app;
