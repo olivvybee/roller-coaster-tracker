@@ -19,6 +19,7 @@ import { PrismaD1 } from '@prisma/adapter-d1';
 import { validator } from 'hono/validator';
 import { addPark, addParkSchema } from './addPark';
 import { addCoaster, addCoasterSchema } from './addCoaster';
+import { updateCoaster, updateCoasterSchema } from './updateCoaster';
 
 interface WorkerEnv extends Env {
 	API_KEY: string;
@@ -92,7 +93,7 @@ app.post(
 	validator('json', (value, ctx) => {
 		const parsed = addCoasterSchema.safeParse(value);
 		if (!parsed.success) {
-			return ctx.json(parsed.error, 401);
+			return ctx.json(parsed.error, 400);
 		}
 		return parsed.data;
 	}),
@@ -100,7 +101,53 @@ app.post(
 		const db = getDB(ctx);
 		const input = ctx.req.valid('json');
 
+		const park = await db.park.findUnique({
+			where: {
+				id: input.parkId,
+			},
+		});
+		if (!park) {
+			return ctx.json({ error: `Park with id "${input.parkId}" not found` }, 404);
+		}
+
 		const result = await addCoaster(input, db);
+		return ctx.json(result);
+	}
+);
+
+app.post(
+	'/coasters/:id/update',
+	validator('param', (value, ctx) => {
+		const parsedId = parseInt(value.id);
+		if (isNaN(parsedId)) {
+			return ctx.json({ error: 'coaster id must be an integer' }, 400);
+		}
+		return {
+			id: parsedId,
+		};
+	}),
+	validator('json', (value, ctx) => {
+		const parsed = updateCoasterSchema.safeParse(value);
+		if (!parsed.success) {
+			return ctx.json(parsed.error, 400);
+		}
+		return parsed.data;
+	}),
+	async (ctx) => {
+		const coasterId = ctx.req.valid('param').id;
+		const db = getDB(ctx);
+		const input = ctx.req.valid('json');
+
+		const coaster = await db.coaster.findUnique({
+			where: {
+				id: coasterId,
+			},
+		});
+		if (!coaster) {
+			return ctx.json({ error: `Coaster with id ${coasterId} not found` }, 404);
+		}
+
+		const result = await updateCoaster(coasterId, input, db);
 		return ctx.json(result);
 	}
 );

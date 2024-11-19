@@ -15,18 +15,6 @@ export const addCoasterSchema = z.object({
 type AddCoasterInput = z.infer<typeof addCoasterSchema>;
 
 export const addCoaster = async (input: AddCoasterInput, db: PrismaClient) => {
-	const park = await db.park.findUnique({
-		where: {
-			id: input.parkId,
-		},
-	});
-
-	if (!park) {
-		return {
-			error: `No park exists with id "${input.parkId}"`,
-		};
-	}
-
 	const result = await db.coaster.create({
 		data: {
 			park: {
