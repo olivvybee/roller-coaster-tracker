@@ -22,7 +22,6 @@ model Coaster {
   id        Int       @id @default(autoincrement())
   name      String
   ridden    Boolean
-  status    Int
   opened    DateTime
   closed    DateTime?
   latitude  Float

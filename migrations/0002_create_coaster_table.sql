@@ -3,7 +3,6 @@ CREATE TABLE "Coaster" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
     "ridden" BOOLEAN NOT NULL,
-    "status" INTEGER NOT NULL,
     "opened" DATETIME NOT NULL,
     "closed" DATETIME,
     "latitude" REAL NOT NULL,
