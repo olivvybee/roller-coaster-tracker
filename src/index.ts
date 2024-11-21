@@ -35,11 +35,10 @@ const app = new Hono<{ Bindings: WorkerEnv }>();
 app.use(prettyJSON());
 app.use(logger());
 
-// TODO: Uncomment to enable auth
-// app.use(async (ctx, next) => {
-// 	const auth = bearerAuth({ token: ctx.env.API_KEY });
-// 	return auth(ctx, next);
-// });
+app.use(async (ctx, next) => {
+	const auth = bearerAuth({ token: ctx.env.API_KEY });
+	return auth(ctx, next);
+});
 
 app.get('/parks', async (ctx) => {
 	const db = getDB(ctx);
@@ -68,7 +67,7 @@ app.post(
 	validator('json', (value, ctx) => {
 		const parsed = addParkSchema.safeParse(value);
 		if (!parsed.success) {
-			return ctx.json(parsed.error, 401);
+			return ctx.json(parsed.error, 400);
 		}
 		return parsed.data;
 	}),
