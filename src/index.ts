@@ -10,7 +10,7 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
-import { Context, Hono } from 'hono';
+import { Context, Hono, MiddlewareHandler } from 'hono';
 import { bearerAuth } from 'hono/bearer-auth';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
@@ -35,10 +35,10 @@ const app = new Hono<{ Bindings: WorkerEnv }>();
 app.use(prettyJSON());
 app.use(logger());
 
-app.use(async (ctx, next) => {
+const authMiddleware: MiddlewareHandler = async (ctx, next) => {
 	const auth = bearerAuth({ token: ctx.env.API_KEY });
 	return auth(ctx, next);
-});
+};
 
 app.get('/parks', async (ctx) => {
 	const db = getDB(ctx);
@@ -64,6 +64,7 @@ app.get('/parks/:id', async (ctx) => {
 
 app.post(
 	'/parks/add',
+	authMiddleware,
 	validator('json', (value, ctx) => {
 		const parsed = addParkSchema.safeParse(value);
 		if (!parsed.success) {
@@ -98,6 +99,7 @@ app.get('/coasters', async (ctx) => {
 
 app.post(
 	'/coasters/add',
+	authMiddleware,
 	validator('json', (value, ctx) => {
 		const parsed = addCoasterSchema.safeParse(value);
 		if (!parsed.success) {
@@ -125,6 +127,7 @@ app.post(
 
 app.post(
 	'/coasters/:id/update',
+	authMiddleware,
 	validator('param', (value, ctx) => {
 		const parsedId = parseInt(value.id);
 		if (isNaN(parsedId)) {
