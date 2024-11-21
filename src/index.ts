@@ -75,6 +75,15 @@ app.post(
 		const db = getDB(ctx);
 		const input = ctx.req.valid('json');
 
+		const existingPark = await db.park.findUnique({
+			where: {
+				id: input.id,
+			},
+		});
+		if (existingPark) {
+			return ctx.json({ error: `Park with id "${input.id}" already exists` }, 400);
+		}
+
 		const result = await addPark(input, db);
 		return ctx.json(result);
 	}
