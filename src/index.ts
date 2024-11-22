@@ -20,6 +20,7 @@ import { validator } from 'hono/validator';
 import { addPark, addParkSchema } from './addPark';
 import { addCoaster, addCoasterSchema } from './addCoaster';
 import { updateCoaster, updateCoasterSchema } from './updateCoaster';
+import { markRidden, markRiddenSchema } from './markRidden';
 
 interface WorkerEnv extends Env {
 	API_KEY: string;
@@ -159,6 +160,35 @@ app.post(
 		}
 
 		const result = await updateCoaster(coasterId, input, db);
+		return ctx.json(result);
+	}
+);
+
+app.post(
+	'/coasters/markRidden',
+	authMiddleware,
+	validator('json', (value, ctx) => {
+		const parsed = markRiddenSchema.safeParse(value);
+		if (!parsed.success) {
+			return ctx.json(parsed.error, 400);
+		}
+		return parsed.data;
+	}),
+	async (ctx) => {
+		const db = getDB(ctx);
+		const input = ctx.req.valid('json');
+
+		const coasters = await db.coaster.findMany({
+			where: { id: { in: input.coasters } },
+			select: { id: true },
+		});
+		if (coasters.length !== input.coasters.length) {
+			const foundIds = coasters.map(({ id }) => id);
+			const missingCoasters = input.coasters.filter((id) => !foundIds.includes(id)).join(', ');
+			return ctx.json(`Coaster ids not found: [${missingCoasters}]`, 404);
+		}
+
+		const result = await markRidden(input, db);
 		return ctx.json(result);
 	}
 );

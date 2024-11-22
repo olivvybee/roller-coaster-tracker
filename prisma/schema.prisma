@@ -19,14 +19,15 @@ model Park {
 }
 
 model Coaster {
-  id        Int     @id @default(autoincrement())
-  name      String
-  ridden    Boolean
-  opened    String
-  closed    String?
-  latitude  Float
-  longitude Float
-  rcdb      String
+  id         Int     @id @default(autoincrement())
+  name       String
+  ridden     Boolean
+  riddenDate String?
+  opened     String
+  closed     String?
+  latitude   Float
+  longitude  Float
+  rcdb       String
 
   park   Park   @relation(fields: [parkId], references: [id])
   parkId String
