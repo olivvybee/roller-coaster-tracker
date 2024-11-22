@@ -60,6 +60,10 @@ app.get('/parks/:id', async (ctx) => {
 		include: { coasters: true },
 	});
 
+	if (!park) {
+		return ctx.notFound();
+	}
+
 	return ctx.json(park);
 });
 
@@ -118,7 +122,7 @@ app.post(
 			},
 		});
 		if (!park) {
-			return ctx.json({ error: `Park with id "${input.parkId}" not found` }, 404);
+			return ctx.notFound();
 		}
 
 		const result = await addCoaster(input, db);
@@ -156,7 +160,7 @@ app.post(
 			},
 		});
 		if (!coaster) {
-			return ctx.json({ error: `Coaster with id ${coasterId} not found` }, 404);
+			return ctx.notFound();
 		}
 
 		const result = await updateCoaster(coasterId, input, db);
