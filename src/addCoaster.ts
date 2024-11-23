@@ -7,6 +7,7 @@ export const addCoasterSchema = z.object({
 	parkId: z.string(),
 	name: z.string(),
 	ridden: z.optional(z.boolean()),
+	riddenDate: z.optional(z.string().regex(dateRegex)),
 	opened: z.string().regex(dateRegex),
 	closed: z.optional(z.string().regex(dateRegex)),
 	latitude: z.number(),
