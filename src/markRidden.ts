@@ -12,7 +12,10 @@ export const markRidden = async (input: MarkRiddenInput, db: PrismaClient) => {
 	const date = new Date().toISOString().slice(0, 10);
 
 	const result = await db.coaster.updateMany({
-		where: { id: { in: input.coasters } },
+		where: {
+			id: { in: input.coasters },
+			ridden: false,
+		},
 		data: {
 			ridden: true,
 			riddenDate: input.includeDate ? date : undefined,
