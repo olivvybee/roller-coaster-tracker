@@ -19,7 +19,7 @@ model Park {
 }
 
 model Coaster {
-  id         Int     @id @default(autoincrement())
+  id         Int     @id @unique
   name       String
   ridden     Boolean
   riddenDate String?
@@ -27,7 +27,6 @@ model Coaster {
   closed     String?
   latitude   Float
   longitude  Float
-  rcdb       String
 
   park   Park   @relation(fields: [parkId], references: [id])
   parkId String

@@ -21,13 +21,13 @@ export const addPark = async (input: AddParkInput, db: PrismaClient) => {
 			country: input.country,
 			coasters: {
 				create: coasters.map((coaster) => ({
+					id: coaster.id,
 					name: coaster.name,
 					ridden: coaster.ridden ?? false,
 					opened: coaster.opened,
 					closed: coaster.closed,
 					latitude: coaster.latitude,
 					longitude: coaster.longitude,
-					rcdb: coaster.rcdb,
 				})),
 			},
 		},
