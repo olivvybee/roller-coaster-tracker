@@ -21,9 +21,12 @@ import { addPark, addParkSchema } from './addPark';
 import { addCoaster, addCoasterSchema } from './addCoaster';
 import { updateCoaster, updateCoasterSchema } from './updateCoaster';
 import { markRidden, markRiddenSchema } from './markRidden';
+import { cors } from 'hono/cors';
+import { checkCorsOrigin } from './utils/checkCorsOrigin';
 
 interface WorkerEnv extends Env {
 	API_KEY: string;
+	CORS_ORIGINS?: string;
 }
 
 const getDB = (ctx: Context<{ Bindings: WorkerEnv }>) => {
@@ -33,6 +36,12 @@ const getDB = (ctx: Context<{ Bindings: WorkerEnv }>) => {
 
 const app = new Hono<{ Bindings: WorkerEnv }>();
 
+app.use(async (ctx, next) => {
+	const corsHandler = cors({
+		origin: ctx.env.CORS_ORIGINS?.split(';') || checkCorsOrigin,
+	});
+	return corsHandler(ctx, next);
+});
 app.use(prettyJSON());
 app.use(logger());
 
