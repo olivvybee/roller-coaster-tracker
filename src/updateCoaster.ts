@@ -6,6 +6,9 @@ export const updateCoasterSchema = addCoasterSchema
 	.omit({
 		parkId: true,
 	})
+	.extend({
+		riddenDate: z.nullable(z.string().date()),
+	})
 	.partial();
 
 type UpdateCoasterInput = z.infer<typeof updateCoasterSchema>;
